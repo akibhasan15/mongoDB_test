@@ -9,34 +9,46 @@ var {Todo}=require('./models/todo')
 var app=express();
 app.use(bodyParser.json());
 
-// app.post('/todos',(req,res)=>{
-// var todo = new Todo({
-//     text:req.body.text
-// });
-
-// todo.save().then((doc)=>{
-//     res.send(doc);
-//    },(e)=>{
-//        res.status(400).send(e);
-//    });
-// });
-
-app.post('/userinfo',(req,res)=>{
-    var user1=new user({
-        email:req.body.email
-    });
-
-    user1.save().then((doc)=>{
-        res.send(doc);
-    }
-    ,(e)=>{
-        res.status(400).send(e);
-    });
+app.post('/todos',(req,res)=>{
+var todo = new Todo({
+    text:req.body.text
 });
+
+todo.save().then((doc)=>{
+    res.send(doc);
+   },(e)=>{
+       res.status(400).send(e);
+   });
+});
+
+// app.post('/userinfo',(req,res)=>{
+//     var user1=new user({
+//         email:req.body.email
+//     });
+
+//     user1.save().then((doc)=>{
+//         res.send(doc);
+//     }
+//     ,(e)=>{
+//         res.status(400).send(e);
+//     });
+// });
+
+app.get('/todos',(req,res)=>{
+    Todo.find().then((todos)=>{
+        res.send({todos,
+        message:"it's okay"});
+        // res.status(200).json(todos);
+    },(e)=>{
+       res.status(400).send(e);
+    })
+})
 
 app.listen(3000,()=>{
     console.log('server is up on port number 3000');
 })
+
+module.exports={app};
 // var newTodo= new Todo({
 //     text:'cook dinner'
 // });
