@@ -1,18 +1,20 @@
 var express=require('express');
 var bodyParser=require('body-parser');
 
-
+var port=process.env.PORT || 3000;
 var {mongoose}=require('./db/mongoose');
 var {user}=require('./models/user');
 var {Todo}=require('./models/todo')
-
+const {ObjectID}=require('mongodb');
 var app=express();
 app.use(bodyParser.json());
+
 
 app.post('/todos',(req,res)=>{
 var todo = new Todo({
     text:req.body.text
 });
+
 
 todo.save().then((doc)=>{
     res.send(doc);
@@ -43,9 +45,40 @@ app.get('/todos',(req,res)=>{
        res.status(400).send(e);
     })
 })
+app.get('/todos/:id',(req,res)=>{
+    var id=req.params.id;
+    if(!ObjectID.isValid(id)){
+        return res.status(404).send({});
+    }
+    
+    Todo.findById(id).then((userInfo)=>{
+        if(!userInfo){
+            return res.status(404).send({})
+        }
+        res.status(200).send({userInfo});
+    }).catch((e)=>res.status(400).send({}) );
+    
+});
 
-app.listen(3000,()=>{
-    console.log('server is up on port number 3000');
+app.delete('/todos/:id',(req,res)=>{
+     var id=req.params.id;
+     if(!ObjectID.isValid(id)){
+         return res.status(404).send({})
+     }
+
+     Todo.findOneAndRemove({_id:id}).then((result)=>{
+if(!result){
+        return res.status(404).send({});
+}    
+      res.status(200).send(result)
+  
+ }).catch((e)=>{
+     res.status(400).send({});
+ });
+
+})
+app.listen(port,()=>{
+    console.log(`server is up on port no. :${port}`);
 })
 
 module.exports={app};
