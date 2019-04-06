@@ -1,8 +1,22 @@
+var env= process.env.NODE_ENV || 'development';
+
+if(env==='development'){
+process.env.PORT=3000;
+process.env.MONGODB_URI='mongodb://localhost:27017/TodoApp';
+}
+else if(env==='test'){
+process.env.PORT=3000;
+process.env.MONGODB_URI='mongodb://localhost:27017/TodoAppTest';
+
+}
+
+
 var express=require('express');
 var bodyParser=require('body-parser');
 const _=require('lodash');
 
-var port=process.env.PORT || 3000;
+var port=process.env.PORT;
+
 var {mongoose}=require('./db/mongoose');
 var {user}=require('./models/user');
 var {Todo}=require('./models/todo')
@@ -48,16 +62,18 @@ app.get('/todos',(req,res)=>{
 })
 app.get('/todos/:id',(req,res)=>{
     var id=req.params.id;
+
     if(!ObjectID.isValid(id)){
         return res.status(404).send({});
     }
     
-    Todo.findById(id).then((userInfo)=>{
-        if(!userInfo){
-            return res.status(404).send({})
+    Todo.findById(id).then((todo)=>{
+        if(!todo){
+            return res.status(404).send()
         }
-        res.status(200).send({userInfo});
-    }).catch((e)=>res.status(400).send({}) );
+
+        res.send({todo});
+    }).catch((e)=>res.status(400).send() );
     
 });
 
@@ -67,11 +83,11 @@ app.delete('/todos/:id',(req,res)=>{
          return res.status(404).send({})
      }
 
-     Todo.findOneAndRemove({_id:id}).then((result)=>{
-if(!result){
+     Todo.findOneAndRemove({_id:id}).then((todo)=>{
+if(!todo){
         return res.status(404).send({});
 }    
-      res.status(200).send(result)
+      res.status(200).send({todo})
   
  }).catch((e)=>{
      res.status(400).send({});
@@ -95,11 +111,11 @@ app.patch('/todos/:id',(req,res)=>{
           body.completedAt=null;
       }
 
-      Todo.findByIdAndUpdate(id,{$set:body},{new:true}).then((result)=>{
-           if(!result){
+      Todo.findByIdAndUpdate(id,{$set:body},{new:true}).then((todo)=>{
+           if(!todo){
                return res.status(404).send();
            }
-           res.send({result});
+           res.send({todo});
       }).catch((e)=>{
           res.status(400).send();
       });
